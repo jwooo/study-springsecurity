@@ -1,6 +1,7 @@
 package io.security.basicsecurity;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -39,5 +40,10 @@ public class SecurityController {
     @GetMapping("/denied")
     public String denied() {
         return "Access is denied";
+    }
+
+    @PostMapping("/")
+    public String postHome() throws Exception {
+        return "home";
     }
 }
