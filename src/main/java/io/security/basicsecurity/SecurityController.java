@@ -1,8 +1,13 @@
 package io.security.basicsecurity;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpSession;
 
 @RestController
 public class SecurityController {
@@ -12,38 +17,9 @@ public class SecurityController {
         return "home";
     }
 
-    @GetMapping("loginPage")
-    public String loginPage() {
-        return "loginPage";
-    }
-
     @GetMapping("/user")
     public String user() {
         return "user";
     }
 
-    @GetMapping("/admin/pay")
-    public String adminPay() {
-        return "adminPay";
-    }
-
-    @GetMapping("/admin/**")
-    public String adminAll() {
-        return "adminAll";
-    }
-
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
-
-    @GetMapping("/denied")
-    public String denied() {
-        return "Access is denied";
-    }
-
-    @PostMapping("/")
-    public String postHome() throws Exception {
-        return "home";
-    }
 }
