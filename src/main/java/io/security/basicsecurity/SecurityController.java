@@ -13,25 +13,13 @@ import javax.servlet.http.HttpSession;
 public class SecurityController {
 
     @GetMapping("/")
-    public String index(HttpSession session) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SecurityContext context = (SecurityContext) session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-        Authentication authentication1 = context.getAuthentication();
-
+    public String index() {
         return "home";
     }
 
-    @GetMapping("/thread")
-    public String thread() {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            }
-        }).start();
-
-
-        return "thread";
+    @GetMapping("/user")
+    public String user() {
+        return "user";
     }
+
 }
