@@ -2,38 +2,40 @@ package com.example.corespringsecurity.security.service;
 
 import com.example.corespringsecurity.domain.Account;
 import com.example.corespringsecurity.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
-public class CustomUserDetailsService implements UserDetailsService {
+@Slf4j
+@Service("userDetailsService")
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
 
-    @Override
+    @Autowired
+    private HttpServletRequest request;
+
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
         Account account = userRepository.findByUsername(username);
-
         if (account == null) {
-            throw new UsernameNotFoundException("Username Not Found Exception");
+            if (userRepository.countByUsername(username) == 0) {
+                throw new UsernameNotFoundException("No user found with username: " + username);
+            }
         }
-
-        List<GrantedAuthority> roles = new ArrayList<>();
+        ArrayList<GrantedAuthority> roles = new ArrayList<GrantedAuthority>();
         roles.add(new SimpleGrantedAuthority(account.getRole()));
 
-        AccountContext accountContext = new AccountContext(account, roles);
-
-        return accountContext;
+        return new AccountContext(account, roles);
     }
 }
