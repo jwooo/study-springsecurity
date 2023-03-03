@@ -1,4 +1,4 @@
-package com.example.corespringsecurity.security.common;
+package io.security.corespringsecurity.security.common;
 
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class FormWebAuthenticationDetails extends WebAuthenticationDetails {
 
-    private String secretKey;
+    private  String secretKey;
 
     public FormWebAuthenticationDetails(HttpServletRequest request) {
         super(request);
@@ -14,6 +14,7 @@ public class FormWebAuthenticationDetails extends WebAuthenticationDetails {
     }
 
     public String getSecretKey() {
+
         return secretKey;
     }
 }
