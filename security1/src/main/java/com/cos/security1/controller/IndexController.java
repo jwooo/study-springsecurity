@@ -48,11 +48,6 @@ public class IndexController {
         return "joinForm";
     }
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
-
     @PostMapping("/join")
     public String join(User user) {
         System.out.println("user = " + user);
