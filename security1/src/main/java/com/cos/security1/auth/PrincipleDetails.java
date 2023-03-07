@@ -14,9 +14,15 @@ import java.util.Map;
 public class PrincipleDetails implements UserDetails, OAuth2User {
 
     private User user;
+    private Map<String, Object> attributes;
 
     public PrincipleDetails(User user) {
         this.user = user;
+    }
+
+    public PrincipleDetails(User user, Map<String, Object> attributes) {
+        this.user = user;
+        this.attributes = attributes;
     }
 
     @Override
@@ -58,7 +64,7 @@ public class PrincipleDetails implements UserDetails, OAuth2User {
 
     @Override
     public Map<String, Object> getAttributes() {
-        return null;
+        return attributes;
     }
 
     @Override
