@@ -27,7 +27,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin()
                 .loginPage("/loginForm")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/");
+                .defaultSuccessUrl("/")
+                .and()
+                .oauth2Login()
+                .loginPage("/loginForm");
     }
 
     @Bean
