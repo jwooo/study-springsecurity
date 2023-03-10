@@ -12,9 +12,4 @@ public class JwtSeverApplication {
     public static void main(String[] args) {
         SpringApplication.run(JwtSeverApplication.class, args);
     }
-
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }
