@@ -38,3 +38,4 @@ out/
 .application-jwt.yml
 .application.yml
 /src/main/resources/application-jwt.yml
+/src/main/resources/application-oauth.yml
