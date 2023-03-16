@@ -40,7 +40,7 @@ public class JwtService {
 
     private static final String EMAIL_CLAIM = "email";
 
-    private static final String BEARER = "Bearer";
+    private static final String BEARER = "Bearer ";
 
     private final UserRepository userRepository;
 
