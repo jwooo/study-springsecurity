@@ -7,6 +7,9 @@ import com.jwtoauth.jwtoauth.global.login.filter.CustomJsonUsernamePasswordFilte
 import com.jwtoauth.jwtoauth.global.login.handler.LoginFailureHandler;
 import com.jwtoauth.jwtoauth.global.login.handler.LoginSuccessHandler;
 import com.jwtoauth.jwtoauth.global.login.service.LoginService;
+import com.jwtoauth.jwtoauth.global.oauth2.handler.OAuth2LoginFailureHandler;
+import com.jwtoauth.jwtoauth.global.oauth2.handler.OAuth2LoginSuccessHandler;
+import com.jwtoauth.jwtoauth.global.oauth2.service.CustomOAuth2UserService;
 import com.jwtoauth.jwtoauth.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.Before;
@@ -32,6 +35,9 @@ public class SecurityConfig {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -46,7 +52,12 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**").permitAll()
                 .antMatchers("/sign-up").permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+        .and()
+                .oauth2Login()
+                .successHandler(oAuth2LoginSuccessHandler)
+                .failureHandler(oAuth2LoginFailureHandler)
+                .userInfoEndpoint().userService(customOAuth2UserService);
 
         http.addFilterAfter(customJsonUsernamePasswordFilter(), LogoutFilter.class);
         http.addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordFilter.class);
