@@ -26,16 +26,19 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtProvider.createRefreshToken();
 
         jwtProvider.sendAccessTokenAndRefreshToken(response, accessToken, refreshToken);
-
-        userRepository.findByEmail(extractEmail(authentication))
-                .ifPresent(user -> {
-                    user.updateRefreshToken(refreshToken);
-                    userRepository.saveAndFlush(user);
-                });
+        updateRefreshToken(authentication, refreshToken);
     }
 
     private String extractEmail(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return userDetails.getUsername();
+    }
+
+    private void updateRefreshToken(Authentication authentication, String refreshToken) {
+        userRepository.findByEmail(extractEmail(authentication))
+                .ifPresent(user -> {
+                    user.updateRefreshToken(refreshToken);
+                    userRepository.saveAndFlush(user);
+                });
     }
 }

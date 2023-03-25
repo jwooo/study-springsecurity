@@ -1,7 +1,11 @@
 package com.jwt.jwtexample.api.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jwt.jwtexample.api.repository.UserRepository;
+import com.jwt.jwtexample.api.security.jwt.utils.JwtProvider;
 import com.jwt.jwtexample.api.security.login.filter.LoginProcessingFilter;
+import com.jwt.jwtexample.api.security.login.handler.LoginFailureHandler;
+import com.jwt.jwtexample.api.security.login.handler.LoginSuccessHandler;
 import com.jwt.jwtexample.api.security.login.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +29,9 @@ public class SecurityConfig {
     private final LoginService loginService;
 
     private final ObjectMapper objectMapper;
+    private final JwtProvider jwtProvider;
+
+    private final UserRepository userRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -66,9 +73,19 @@ public class SecurityConfig {
         LoginProcessingFilter filter = new LoginProcessingFilter(objectMapper);
 
         filter.setAuthenticationManager(authenticationManager());
-//        filter.setAuthenticationSuccessHandler(null);
-//        filter.setAuthenticationFailureHandler(null);
+        filter.setAuthenticationSuccessHandler(loginSuccessHandler());
+        filter.setAuthenticationFailureHandler(loginFailureHandler());
 
         return filter;
+    }
+
+    @Bean
+    public LoginSuccessHandler loginSuccessHandler() {
+        return new LoginSuccessHandler(jwtProvider, userRepository);
+    }
+
+    @Bean
+    public LoginFailureHandler loginFailureHandler() {
+        return new LoginFailureHandler();
     }
 }

@@ -1,5 +1,6 @@
 package com.jwt.jwtexample.api.security.login.filter;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +22,7 @@ public class LoginProcessingFilter extends AbstractAuthenticationProcessingFilte
     private static final String DEFAULT_LOGIN_REQUEST_URL = "/api/login";
     private static final String HTTP_METHOD = "POST";
     private static final String CONTENT_TYPE = "application/json";
-    private static final String USERNAME_KEY = "username";
+    private static final String USERNAME_KEY = "email";
     private static final String PASSWORD_KEY = "password";
 
     private static final AntPathRequestMatcher DEFAULT_LOGIN_PATH_REQUEST_MATCHERS =
@@ -37,18 +38,18 @@ public class LoginProcessingFilter extends AbstractAuthenticationProcessingFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
 
-        if (request.getContentType() == null || !request.getContentType().equals(CONTENT_TYPE)) {
+        if (!CONTENT_TYPE.equals(request.getContentType())) {
             throw new AuthenticationServiceException("Authentication Content-Type is not Supported: " + request.getContentType());
         }
 
         String messageBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
         Map<String, String> usernamePasswordMap = objectMapper.readValue(messageBody, Map.class);
 
-        String email = usernamePasswordMap.get(USERNAME_KEY);
+        String username = usernamePasswordMap.get(USERNAME_KEY);
         String password = usernamePasswordMap.get(PASSWORD_KEY);
 
         UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(email, password);
+                new UsernamePasswordAuthenticationToken(username, password);
 
         return this.getAuthenticationManager().authenticate(authToken);
     }
