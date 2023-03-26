@@ -9,6 +9,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 
 public class LoginProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -42,8 +44,8 @@ public class LoginProcessingFilter extends AbstractAuthenticationProcessingFilte
             throw new AuthenticationServiceException("Authentication Content-Type is not Supported: " + request.getContentType());
         }
 
-        String messageBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
-        Map<String, String> usernamePasswordMap = objectMapper.readValue(messageBody, Map.class);
+        String requestBody = getRequestBody(request);
+        Map<String, String> usernamePasswordMap = objectMapper.readValue(requestBody, Map.class);
 
         String username = usernamePasswordMap.get(USERNAME_KEY);
         String password = usernamePasswordMap.get(PASSWORD_KEY);
@@ -52,5 +54,13 @@ public class LoginProcessingFilter extends AbstractAuthenticationProcessingFilte
                 new UsernamePasswordAuthenticationToken(username, password);
 
         return this.getAuthenticationManager().authenticate(authToken);
+    }
+
+    private static String getRequestBody(HttpServletRequest request) throws IOException {
+        String requestBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
+        if (!StringUtils.hasText(requestBody)) {
+            throw new AuthenticationServiceException("request is empty");
+        }
+        return requestBody;
     }
 }
