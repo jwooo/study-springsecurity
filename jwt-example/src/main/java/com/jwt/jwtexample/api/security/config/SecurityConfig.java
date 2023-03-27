@@ -2,6 +2,7 @@ package com.jwt.jwtexample.api.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jwt.jwtexample.api.repository.UserRepository;
+import com.jwt.jwtexample.api.security.jwt.filter.JwtAuthenticationFilter;
 import com.jwt.jwtexample.api.security.jwt.utils.JwtProvider;
 import com.jwt.jwtexample.api.security.login.filter.LoginProcessingFilter;
 import com.jwt.jwtexample.api.security.login.handler.LoginFailureHandler;
@@ -49,6 +50,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated();
 
         http.addFilterAfter(loginProcessingFilter(), LogoutFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter(), LogoutFilter.class);
 
         return http.build();
     }
@@ -77,6 +79,11 @@ public class SecurityConfig {
         filter.setAuthenticationFailureHandler(loginFailureHandler());
 
         return filter;
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtProvider, userRepository);
     }
 
     @Bean

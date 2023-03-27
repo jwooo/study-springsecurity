@@ -1,9 +1,9 @@
 package com.jwt.jwtexample.api.security.jwt.utils;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
 
-import static javax.servlet.http.HttpServletResponse.*;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 @Component
 public class JwtProvider {
@@ -74,9 +74,27 @@ public class JwtProvider {
         response.setHeader(refreshHeader, refreshToken);
     }
 
+    public Claims getJwtTokenBody(String token) {
+        return getParser().parseClaimsJws(token)
+                .getBody();
+    }
+
+    public boolean isValidToken(String token) {
+        try {
+            getParser().parseClaimsJws(token).getBody();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private JwtParser getParser() {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build();
+    }
 
     private Date expireTime(Long expirationPeriod) {
         return new Date(System.currentTimeMillis() + expirationPeriod);
     }
-
 }
