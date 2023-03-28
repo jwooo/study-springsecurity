@@ -1,9 +1,11 @@
 package com.jwt.jwtexample.api.security.jwt.utils;
 
+import com.jwt.jwtexample.api.domain.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,7 @@ import java.util.Optional;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 @Component
+@Getter
 public class JwtProvider {
 
     private final Key secretKey;
@@ -52,6 +55,13 @@ public class JwtProvider {
                 .setExpiration(expireTime(refreshTokenExpirationPeriod))
                 .signWith(secretKey)
                 .compact();
+    }
+
+    public TokenDto createTokenDto(User user) {
+        return TokenDto.builder()
+                .accessToken(createAccessToken(user.getEmail()))
+                .refreshToken(createRefreshToken())
+                .build();
     }
 
     public Optional<String> extractAccessToken(HttpServletRequest request) {

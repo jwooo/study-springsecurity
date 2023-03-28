@@ -46,7 +46,7 @@ public class SecurityConfig {
         .and()
                 .authorizeRequests()
                 .mvcMatchers("/h2-console/**", "/").permitAll()
-                .mvcMatchers("/api/signup").permitAll()
+                .mvcMatchers("/api/signup", "/api/refresh").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterAfter(loginProcessingFilter(), LogoutFilter.class);
