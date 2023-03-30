@@ -1,6 +1,7 @@
 package com.jwt.jwtexample.api.service;
 
 import com.jwt.jwtexample.api.domain.User;
+import com.jwt.jwtexample.api.exception.AlreadyExistsEmailException;
 import com.jwt.jwtexample.api.repository.UserRepository;
 import com.jwt.jwtexample.api.request.UserSignUpDto;
 import org.assertj.core.api.Assertions;
@@ -47,7 +48,7 @@ class UserServiceTest {
 
         UserSignUpDto request = getUserSignUpDto();
         assertThatThrownBy(() -> userService.signup(request))
-                .isInstanceOf(Exception.class);
+                .isInstanceOf(AlreadyExistsEmailException.class);
     }
 
     private static UserSignUpDto getUserSignUpDto() {
