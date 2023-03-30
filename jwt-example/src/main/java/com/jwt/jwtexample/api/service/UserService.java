@@ -1,6 +1,7 @@
 package com.jwt.jwtexample.api.service;
 
 import com.jwt.jwtexample.api.domain.User;
+import com.jwt.jwtexample.api.exception.AlreadyExistsEmailException;
 import com.jwt.jwtexample.api.repository.UserRepository;
 import com.jwt.jwtexample.api.request.UserSignUpDto;
 import com.jwt.jwtexample.api.security.jwt.utils.JwtProvider;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static com.jwt.jwtexample.api.domain.Role.USER;
 
@@ -23,8 +26,10 @@ public class UserService {
 
     public void signup(UserSignUpDto userSignUpDto) throws Exception {
 
-        if (userRepository.findByEmail(userSignUpDto.getEmail()).isPresent()) {
-            throw new Exception("중복된 이메일을 입력하였습니다.");
+        Optional<User> findOptionalUser = userRepository.findByEmail(userSignUpDto.getEmail());
+
+        if (findOptionalUser.isPresent()) {
+            throw new AlreadyExistsEmailException();
         }
 
         User saveUser = User.builder()
