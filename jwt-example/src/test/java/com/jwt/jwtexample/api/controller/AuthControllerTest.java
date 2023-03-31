@@ -12,22 +12,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.springframework.http.MediaType.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -42,6 +36,9 @@ class AuthControllerTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private UserRepository userRepository;
@@ -71,20 +68,21 @@ class AuthControllerTest {
                 .andDo(print());
     }
 
-    // todo @ControllerAdvice 추가해서 Exception 통합 처리 예정
-//    @DisplayName("회원가입시에 동일한 이메일 정보를 가진 유저가 있으면 Exception을 발생시킨다.")
-//    @Test
-//    public void sign_up_fail_same_user_in_db() throws Exception {
-//        UserSignUpDto request = createUser();
-//        userService.signup(request);
-//
-//        String json = objectMapper.writeValueAsString(request);
-//        mockMvc.perform(post("/api/signup")
-//                .contentType(APPLICATION_JSON)
-//                .content(json))
-//                .andExpect(status().isInternalServerError())
-//                .andDo(print());
-//    }
+    @DisplayName("회원가입시에 동일한 이메일 정보를 가진 유저가 있으면 Exception을 발생시킨다.")
+    @Test
+    public void sign_up_fail_same_user_in_db() throws Exception {
+        UserSignUpDto request = createUser();
+
+        userService.signup(request);
+        String json = objectMapper.writeValueAsString(request);
+        mockMvc.perform(post("/api/signup")
+                .contentType(APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.message").value("이미 가입된 이메일 입니다."))
+                .andDo(print());
+    }
 
    @DisplayName("요청 헤더에 Authorization-refresh 값을 넣고 전송하여 전송한 값이 유효하다면 새로운 Authorization-header들을 반환함")
    @Test
@@ -105,7 +103,40 @@ class AuthControllerTest {
                .andDo(print());
    }
 
-   // todo: @ControllerAdvice로 유효하지 않은 refreshToken을 반환하였을때 status Code 변경과 error Code return 해주기
+    @DisplayName("요청 헤더에 유효하지 않은 refresh-token을 전송한다.")
+    @Test
+    public void send_authorization_refresh_in_request_header_is_invalid() throws Exception {
+        String refreshToken = jwtProvider.createRefreshToken();
+        String invalidToken = "Bearer " + refreshToken + "is invalid";
+
+        userRepository.save(User.builder()
+                .email("aaa@aaa.com")
+                .password(passwordEncoder.encode("1234"))
+                .role(Role.USER)
+                .refreshToken(refreshToken)
+                .build());
+
+        mockMvc.perform(post("/api/refresh")
+                .header("Authorization-refresh", invalidToken))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401"))
+                .andExpect(jsonPath("$.message").value("허용되지 않는 리프레쉬 토큰입니다."))
+                .andDo(print());
+    }
+
+    @DisplayName("발급한 적 없는 refresh-token을 전송한다.")
+    @Test
+    public void send_authorization_refresh_not_reissue_token() throws Exception {
+        String refreshToken = jwtProvider.createRefreshToken();
+
+        mockMvc.perform(post("/api/refresh")
+                .header("Authorization-refresh", refreshToken))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401"))
+                .andExpect(jsonPath("$.message").value("허용되지 않는 리프레쉬 토큰입니다."))
+                .andDo(print());
+    }
+
 
 
     private static UserSignUpDto createUser() {

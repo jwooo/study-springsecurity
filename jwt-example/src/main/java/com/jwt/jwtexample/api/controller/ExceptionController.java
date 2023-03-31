@@ -1,5 +1,6 @@
-package com.jwt.jwtexample.api.exception;
+package com.jwt.jwtexample.api.controller;
 
+import com.jwt.jwtexample.api.exception.MyServiceException;
 import com.jwt.jwtexample.api.response.ErrorResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;

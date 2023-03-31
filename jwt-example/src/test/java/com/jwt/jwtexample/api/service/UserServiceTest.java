@@ -4,7 +4,6 @@ import com.jwt.jwtexample.api.domain.User;
 import com.jwt.jwtexample.api.exception.AlreadyExistsEmailException;
 import com.jwt.jwtexample.api.repository.UserRepository;
 import com.jwt.jwtexample.api.request.UserSignUpDto;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -30,7 +30,7 @@ class UserServiceTest {
 
     @DisplayName("중복되지 않은 email로 signup을 호출하면 정상적으로 회원이 저장된다")
     @Test
-    public void not_duplicated_email_save_user() throws Exception{
+    public void not_duplicated_email_save_user() {
         UserSignUpDto request = getUserSignUpDto();
         userService.signup(request);
 
@@ -43,7 +43,7 @@ class UserServiceTest {
 
     @DisplayName("중복된 email로 signup을 호출하면 회원가입이 되지 않는다.")
     @Test
-    public void duplicated_email_not_save_user() throws Exception {
+    public void duplicated_email_not_save_user() {
         userService.signup(getUserSignUpDto());
 
         UserSignUpDto request = getUserSignUpDto();
