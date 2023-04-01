@@ -87,7 +87,7 @@ class LoginProcessingFilterTest {
         mockMvc.perform(post("/api/login")
                         .contentType(APPLICATION_JSON)
                         .content((json)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andDo(print());
     }
 
@@ -104,7 +104,7 @@ class LoginProcessingFilterTest {
         mockMvc.perform(post("/api/login")
                         .contentType(APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andDo(print());
     }
 
@@ -114,7 +114,7 @@ class LoginProcessingFilterTest {
 
         mockMvc.perform(post("/api/login")
                         .contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andDo(print());
     }
 
@@ -130,7 +130,7 @@ class LoginProcessingFilterTest {
 
         mockMvc.perform(post("/api/login")
                 .content(json))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andDo(print());
     }
 }
