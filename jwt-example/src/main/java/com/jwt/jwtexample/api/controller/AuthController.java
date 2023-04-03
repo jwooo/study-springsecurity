@@ -41,4 +41,9 @@ public class AuthController {
     public String jwtTest() {
         return "JWT-TEST 요청 성공";
     }
+
+    @GetMapping("/admin/jwt-test")
+    public String jwtAdminTest() {
+        return "JWT-ADMIN TEST 입니다.";
+    }
 }
