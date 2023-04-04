@@ -20,6 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -81,6 +82,50 @@ class AuthControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.message").value("이미 가입된 이메일 입니다."))
+                .andDo(print());
+    }
+
+    @DisplayName("Authorization 헤더에 값을 안넣고 전송")
+    @Test
+    public void send_not_data_in_authorization() throws Exception {
+        mockMvc.perform(get("/api/jwt-test"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401"))
+                .andExpect(jsonPath("$.message").value("Full authentication is required to access this resource"))
+                .andDo(print());
+    }
+
+    @DisplayName("유효하지 않은 Authorization 헤더를 전송")
+    @Test
+    public void send_authorization_header_invalid() throws Exception {
+        User saveUser = userRepository.save(User.builder()
+                .email("aaa@aaa.com")
+                .password(passwordEncoder.encode("1234"))
+                .role(Role.USER)
+                .build());
+        String accessToken = jwtProvider.createAccessToken(saveUser.getEmail());
+
+        mockMvc.perform(get("/api/jwt-test")
+                .header("Authorization", accessToken))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401"))
+                .andExpect(jsonPath("$.message").value("Full authentication is required to access this resource"))
+                .andDo(print());
+    }
+
+    @DisplayName("유효한 Authorization 헤더를 전송")
+    @Test
+    public void send_authorization_header_valid() throws Exception {
+        User saveUser = userRepository.save(User.builder()
+                .email("aaa@aaa.com")
+                .password(passwordEncoder.encode("1234"))
+                .role(Role.USER)
+                .build());
+        String accessToken = jwtProvider.createAccessToken(saveUser.getEmail());
+
+        mockMvc.perform(get("/api/jwt-test")
+                .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
                 .andDo(print());
     }
 
