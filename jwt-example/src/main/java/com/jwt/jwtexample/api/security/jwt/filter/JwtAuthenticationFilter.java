@@ -4,6 +4,7 @@ import com.jwt.jwtexample.api.domain.User;
 import com.jwt.jwtexample.api.repository.UserRepository;
 import com.jwt.jwtexample.api.security.jwt.utils.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -27,20 +29,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        try {
+            String accessToken = jwtProvider.extractAccessToken(request)
+                    .filter(jwtProvider::isValidToken)
+                    .orElse(null);
 
-        String accessToken = jwtProvider.extractAccessToken(request)
-                .filter(jwtProvider::isValidToken)
-                .orElse(null);
+            if (isUnAuthenticationRequest(request, accessToken)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-        if (isUnAuthenticationRequest(request, accessToken)) {
-            filterChain.doFilter(request, response);
-            return;
+            String subject = jwtProvider.getJwtTokenBody(accessToken).getSubject();
+            User user = userRepository.findByEmail(subject)
+                    .orElseThrow(() -> new UsernameNotFoundException("일치하는 사용자를 찾을 수 없습니다."));
+            authenticateUser(user);
+
+//            filterChain.doFilter(request, response);
+        } catch (UsernameNotFoundException e) {
+            log.error("UsernameNotFoundException occurred: {}", e.getMessage());
         }
-
-        String subject = jwtProvider.getJwtTokenBody(accessToken).getSubject();
-        User user = userRepository.findByEmail(subject)
-                .orElseThrow(() -> new UsernameNotFoundException("일치하는 사용자를 찾을 수 없습니다."));
-        authenticateUser(user);
 
         filterChain.doFilter(request, response);
     }

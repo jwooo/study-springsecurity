@@ -24,7 +24,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        log.error("Denied Handler: Forbidden / errorMessage = {}", accessDeniedException.getMessage());
+        log.error("Denied Handler: Forbidden, errorMessage = {}", accessDeniedException.getMessage());
         resolver.resolveException(request, response, null, accessDeniedException);
     }
 }
