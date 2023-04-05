@@ -1,5 +1,6 @@
 package com.jwt.jwtexample.api.controller;
 
+import com.jwt.jwtexample.api.exception.NotAllowedRefreshToken;
 import com.jwt.jwtexample.api.request.UserSignUpDto;
 import com.jwt.jwtexample.api.security.jwt.utils.JwtProvider;
 import com.jwt.jwtexample.api.security.jwt.utils.TokenDto;
@@ -19,7 +20,7 @@ public class AuthController {
     private final JwtProvider jwtProvider;
 
     @PostMapping("/signup")
-    public String signup(@RequestBody UserSignUpDto userSignUpDto) throws Exception{
+    public String signup(@RequestBody UserSignUpDto userSignUpDto) {
         userService.signup(userSignUpDto);
 
         return "회원가입 완료";
@@ -29,7 +30,7 @@ public class AuthController {
     public void refresh(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = jwtProvider.extractRefreshToken(request)
                 .filter(jwtProvider::isValidToken)
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(NotAllowedRefreshToken::new);
         TokenDto tokenDto = userService.reIssueToken(refreshToken);
 
         response.setHeader(jwtProvider.getAccessHeader(), tokenDto.getAccessToken());
@@ -39,5 +40,10 @@ public class AuthController {
     @GetMapping("/jwt-test")
     public String jwtTest() {
         return "JWT-TEST 요청 성공";
+    }
+
+    @GetMapping("/admin/jwt-test")
+    public String jwtAdminTest() {
+        return "JWT-ADMIN TEST 입니다.";
     }
 }

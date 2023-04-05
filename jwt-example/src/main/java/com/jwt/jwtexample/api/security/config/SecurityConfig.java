@@ -19,7 +19,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
@@ -34,6 +36,9 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
 
+    private final AuthenticationEntryPoint entryPoint;
+    private final AccessDeniedHandler deniedHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -47,7 +52,12 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .mvcMatchers("/h2-console/**", "/").permitAll()
                 .mvcMatchers("/api/signup", "/api/refresh").permitAll()
-                .anyRequest().authenticated();
+                .mvcMatchers("/api/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+        .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(entryPoint)
+                .accessDeniedHandler(deniedHandler);
 
         http.addFilterAfter(loginProcessingFilter(), LogoutFilter.class);
         http.addFilterBefore(jwtAuthenticationFilter(), LogoutFilter.class);
@@ -93,6 +103,6 @@ public class SecurityConfig {
 
     @Bean
     public LoginFailureHandler loginFailureHandler() {
-        return new LoginFailureHandler();
+        return new LoginFailureHandler(objectMapper);
     }
 }
